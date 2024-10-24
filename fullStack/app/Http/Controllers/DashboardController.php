@@ -15,23 +15,28 @@ class DashboardController extends Controller
     public function ticker($ticker)
     {
         $response = Http::get(
-            'http://localhost:5000/api/' . $ticker
+            $_ENV['MICROSERVICES_API_URL'] . $ticker
         );
         $apiData = json_decode($response, true);
 
-        return view('pages.ticker', compact('apiData'));
+        return view('pages.ticker', compact('apiData', 'ticker'));
     }
 
     public function predict(Request $request, $ticker)
     {
-        $days = $request->query('days');
-        $window = $request->query('window');
+        $request->validate([
+            'days'=>'required|integer',
+            'window'=>'required|integer'
+        ]);
+
+        $days = $request->input('days');
+        $window = $request->input('window');
 
         $response = Http::get(
-            'http://localhost:5000/api/' . $ticker . '/predict?days=' . $days . '&window=' . $window
+            $_ENV['MICROSERVICES_API_URL'] . $ticker . '/predict?days=' . $days . '&window=' . $window
         );
         $apiData = json_decode($response, true);
 
-        return view('pages.predict', compact('apiData'));
+        return view('pages.predict', compact('apiData', 'ticker','days','window'));
     }
 }

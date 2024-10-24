@@ -43,7 +43,7 @@ def tuning_model():
     xgb = XGBRegressor()
     
     rf_params = {
-        'n_estimators': [50,100,150,200,250,300],
+        'n_estimators': [100,150,200,250,300],
         'max_depth': [4,6,8,10,12,15,20],
         'min_samples_split': [2,5,10,15,20],
         'min_samples_leaf': [2,5,10,15,20],
@@ -51,10 +51,10 @@ def tuning_model():
     }
     
     xgb_params = {
-        'learning_rate': [0.01,0.05,0.1,0.15,0.2,0.25,0.3],
-        'max_depth': [3,4,5,6,7,8,9,10,15],
+        'learning_rate': [0.01,0.05,0.1,0.15,0.2,0.25],
+        'max_depth': [3,4,5,6,7,8,9,10],
         'subsample': [0.3,0.5,0.7,1.0],
-        'n_estimators': [50,100,150,200,300],
+        'n_estimators': [100,150,200,250,300],
     }
     
     grid_rf = GridSearchCV(rf, rf_params, scoring='neg_root_mean_squared_error', cv=10)
@@ -76,14 +76,16 @@ def predict_data():
     y_pred_rf = rf.predict(X_test)
     y_pred_xgb = xgb.predict(X_test)
     
-    print(rf.best_params_)
-    print(xgb.best_params_)
+    print(f'Best Params for RF : {rf.best_params_}')
+    print(f'Best Params for XGB : {xgb.best_params_}')
     return y_test, y_pred_rf, y_pred_xgb
 
     
-
+print('Experiment on going:')
 stocks_ticker()
 preprocessing_data()
 train_test_data()
-print(tuning_model())
-print(predict_data())
+print('Model going to be tune with GridSearch')
+tuning_model()
+print('Result is :')
+predict_data()

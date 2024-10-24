@@ -1,133 +1,194 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.AppLayouts')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-
-<body>
+@section('content')
     <div>
-        <h3>Prediction Data</h3>
-        {{-- <ul>
-            @for ($i = 0; $i < count($apiData['data']['index']); $i++)
-                <li>{{ $apiData['data']['index'][$i] }}</li>
-                <li>{{ $apiData['data']['close'][$i] }}</li>
-            @endfor
-        </ul> --}}
-        <canvas id='chrt'></canvas>
-        <button onClick='resetChart()'>Reset Chart</button>
+        <div class='mb-2 d-flex align-items-center gap-2'>
+            <h3>Prediksi Data</h3>
+        </div>
+        <a class='btn btn-dark mb-3' href='{{ route('dashboard.ticker', $ticker) }}'>Kembali</a>
+        <div class='col card p-4 d-flex flex-column gap-3'>
+            <div class='col'>
+                <canvas id='chrtTicker' class='pb-4' style='max-height: 500px; max-width: 100%;'></canvas>
+                <button id='resetZoom' class='btn btn-primary'>Reset Zoom</button>
+            </div>
+            <div class="col">
+                <hr>
+            </div>
+            <div class="col">
+                <div class="py-4">
+                    <div class="mb-4">
+                        <h5 class="text-center fw-bold">Detail Prediksi Data Untuk Hari ke-{{ $days }} dengan Window
+                            {{ $window }}</h5>
+                    </div>
+                    <div class='d-flex justify-content-center'>
+                        <div class='col-md-10'>
+                            <table id='tablePred' class='display cell-border' width='100%'></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+@endsection
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"
-        integrity="sha512-wUYbRPLV5zs6IqvWd88HIqZU/b8TBx+I8LEioQ/UC0t5EMCLApqhIAnUg7EsAzdbhhdgW07TqYDdH3QEXRcPOQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+@section('js')
     <script>
-        var ctx = document.getElementById('chrt');
-        var apiData = @json($apiData)
+        $(document).ready(function() {
+            function tablePredict(apiData, table) {
+                var combinedData = [];
 
-        const close_actual = apiData.data.df_combined.slice(0, apiData.data.df_combined.length - apiData.data.close_pred
-            .length);
-        const close_pred = Array(apiData.data.df_combined.length - apiData.data.close_pred.length).fill(null).concat(apiData
-            .data.close_pred);
-        const upper_band = Array(apiData.data.df_combined.length - apiData.data.upper_band.length).fill(null).concat(apiData
-            .data.upper_band);
-        const middle_band = Array(apiData.data.df_combined.length - apiData.data.sma_band.length).fill(null).concat(apiData
-            .data.sma_band);
-        const lower_band = Array(apiData.data.df_combined.length - apiData.data.lower_band.length).fill(null).concat(apiData
-            .data.lower_band);
+                for (var i = 0; i < apiData.data.index_pred.length; i++) {
+                    combinedData.push([
+                        apiData.data.index_pred[i],
+                        apiData.data.status[i]
+                    ]);
+                }
 
-        chartLine = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: apiData.data.index_combined,
-                datasets: [{
-                        label: 'Harga Penutupan Aktual (Close)',
-                        data: close_actual,
-                        fill: false,
-                        borderColor: 'blue',
-                        backgroundColor: '#ffffff',
-                        pointRadius: 0,
-                        borderWidth: 2,
-                    },
-                    {
-                        label: 'Harga Penutupan Aktual dan Prediksi (Close)',
-                        data: close_pred,
-                        fill: false,
-                        borderColor: 'orange',
-                        backgroundColor: '#ffffff',
-                        pointRadius: 0,
-                        borderWidth: 2,
-                    },
-                    {
-                        label: 'Upperband',
-                        data: upper_band,
-                        fill: false,
-                        borderColor: 'red',
-                        backgroundColor: '#ffffff',
-                        pointRadius: 0
-                    },
-                    {
-                        label: 'Middleband (SMA)',
-                        data: middle_band,
-                        fill: false,
-                        borderColor: 'black',
-                        backgroundColor: '#ffffff',
-                        pointRadius: 0
-                    },
-                    {
-                        label: 'Lowerband',
-                        data: lower_band,
-                        fill: false,
-                        borderColor: 'green',
-                        backgroundColor: '#ffffff',
-                        pointRadius: 0
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                    },
-                },
-                plugins: {
-                    pan: {
-                        enabled: true,
-                        modifierKey: 'ctrl',
-                    },
-                    zoom: {
-                        zoom: {
-                            drag: {
-                                enabled: true,
-                            },
+                var table = new DataTable(table, {
+                    'dom': 'rftip',
+                    pageLength: 10,
+                    columns: [{
+                            title: 'Tanggal'
                         },
-                    },
-                    title: {
-                        display: true,
-                        text: apiData.data.ticker,
-                    },
-                    transition: {
-                        zoom: {
-                            animation: {
-                                duration: 4000,
-                                easing: 'easeOutCubic'
-                            },
+                        {
+                            title: 'Prediksi'
                         },
-                    },
-                },
+                    ],
+                    data: combinedData,
+                })
+
+                return table;
             }
-        });
 
-        function resetChart() {
-            chartLine.resetZoom()
-        }
+            function chartPredict(apiData, canvas) {
+                var close_actual = apiData.data.df_combined.slice(0, apiData.data.df_combined.length - apiData.data
+                    .close_pred
+                    .length);
+                var close_pred = Array(apiData.data.df_combined.length - apiData.data.close_pred.length).fill(null)
+                    .concat(
+                        apiData.data.close_pred);
+                var upper_band = Array(apiData.data.df_combined.length - apiData.data.upper_band.length).fill(null)
+                    .concat(
+                        apiData.data.upper_band);
+                var middle_band = Array(apiData.data.df_combined.length - apiData.data.sma_band.length).fill(null)
+                    .concat(
+                        apiData.data.sma_band);
+                var lower_band = Array(apiData.data.df_combined.length - apiData.data.lower_band.length).fill(null)
+                    .concat(
+                        apiData.data.lower_band);
+
+                var chartLine = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: apiData.data.index_combined,
+                        datasets: [{
+                                label: 'Harga Penutupan Aktual (Close)',
+                                data: close_actual,
+                                fill: false,
+                                borderColor: 'blue',
+                                backgroundColor: '#ffffff',
+                                pointRadius: 0,
+                                borderWidth: 2,
+                            },
+                            {
+                                label: 'Harga Penutupan Aktual dan Prediksi (Close)',
+                                data: close_pred,
+                                fill: false,
+                                borderColor: 'orange',
+                                backgroundColor: '#ffffff',
+                                pointRadius: 0,
+                                borderWidth: 2,
+                            },
+                            {
+                                label: 'Upperband',
+                                data: upper_band,
+                                fill: false,
+                                borderColor: 'red',
+                                backgroundColor: '#ffffff',
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Middleband (SMA)',
+                                data: middle_band,
+                                fill: false,
+                                borderColor: 'black',
+                                backgroundColor: '#ffffff',
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Lowerband',
+                                data: lower_band,
+                                fill: false,
+                                borderColor: 'green',
+                                backgroundColor: '#ffffff',
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                        plugins: {
+                            zoom: {
+                                zoom: {
+                                    drag: {
+                                        enabled: true,
+                                        borderColor: 'rgba(0,0,0,0.3)',
+                                        borderWidth: 1,
+                                    },
+                                    mode: 'xy',
+                                },
+                                pan: {
+                                    enabled: true,
+                                    modifierKey: 'ctrl',
+                                },
+                            },
+                            title: {
+                                display: true,
+                                text: apiData.data.ticker,
+                            },
+                            transition: {
+                                zoom: {
+                                    animation: {
+                                        duration: 4000,
+                                        easing: 'easeOutCubic'
+                                    },
+                                },
+                            },
+                        },
+                    }
+                });
+
+                return chartLine;
+            }
+
+            function resetChart(chartLine) {
+                chartLine.resetZoom();
+            }
+
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
+                tooltipTriggerEl))
+
+            var chartCanvas = $('#chrtTicker');
+            var tablePrediction = $('#tablePred');
+            var data = @json($apiData);
+
+            var chartLine = chartPredict(data, chartCanvas);
+            var tablePredict = tablePredict(data, tablePrediction)
+
+
+
+            $('#resetZoom').click(function() {
+                resetChart(chartLine);
+            })
+        })
     </script>
+@endsection
+
 </body>
 
 </html>

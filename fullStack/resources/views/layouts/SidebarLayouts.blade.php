@@ -13,28 +13,28 @@
             </li> --}}
             <li>
                 <a href="{{ route('dashboard.index') }}">
-                    <i class="bx bx-grid-alt"></i>
+                    <i class="bx bx-grid-alt" style="font-size: 24px"></i>
                     <span class="link_name">Dashboard</span>
                 </a>
                 <span class="tooltip">Dashboard</span>
             </li>
             <li>
                 <a href="#">
-                    <i class="bx bx-stats"></i>
+                    <i class="bx bx-stats" style="font-size: 24px"></i>
                     <span class="link_name">Prediksi</span>
                 </a>
                 <span class="tooltip">Prediksi</span>
             </li>
             <li>
                 <a href="#">
-                    <i class="bx bx-info-circle"></i>
+                    <i class="bx bx-info-circle" style="font-size: 24px"></i>
                     <span class="link_name">Informasi</span>
                 </a>
                 <span class="tooltip">Informasi</span>
             </li>
             <li>
                 <a href="#">
-                    <i class="bx bx-help-circle"></i>
+                    <i class="bx bx-help-circle" style="font-size: 24px"></i>
                     <span class="link_name">Bantuan</span>
                 </a>
                 <span class="tooltip">Bantuan</span>

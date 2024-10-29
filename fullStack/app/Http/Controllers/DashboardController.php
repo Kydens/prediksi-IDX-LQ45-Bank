@@ -9,7 +9,35 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return view('pages.home');
+        $apiKey = env('APIKEY_SERPAPIGOOGLENEWS');
+        $articles = [];
+
+        $guzzleClient = new \GuzzleHttp\Client(['base_uri'=>'https://serpapi.com', 'verify'=>false]);
+
+        try {
+            $response = $guzzleClient->get('/search?google_news',['query'=>['q'=>'saham','gl'=>'id','hl'=>'id','api_key'=>$apiKey]]);
+
+            $data = json_decode($response->getBody(), true);
+
+            if(isset($data['top_stories']) && is_array($data['top_stories'])) {
+                $articles = $data['top_stories'];
+
+                $articles = array_map(function($article) {
+                    return [
+                        'title' => $article['title'] ?? '',
+                        'url' => $article['link'] ?? '',
+                        'urlToImage' => $article['thumbnail'] ?? '',
+                        'publishedAt' => $article['date'],
+                        'source' => $article['source'] ?? '',
+                    ];
+                }, $articles);
+            }
+
+        } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+            dd($e->getMessage());
+        }
+
+        return view('pages.home', compact('articles'));
     }
 
     public function ticker($ticker)

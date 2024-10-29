@@ -1,12 +1,12 @@
 @extends('layouts.AppLayouts')
 
 @section('content')
-    <div class="col">
+    <div class="wrapper">
         <h3>Harga Penutupan Sahan {{ $ticker }}</h3>
         <div class="col">
             <div class="card p-4">
                 <div class="col mb-2">
-                    <canvas id='chrtTicker' class="pb-4" style="max-height: 500px; max-width: 100%;"></canvas>
+                    <canvas id='chrtTicker' class="pb-4" style="max-height: 500px; min-width: 100%;"></canvas>
                     <button id='resetZoom' class='btn btn-primary'>Reset Zoom</button>
                 </div>
                 <div class="col">
@@ -17,7 +17,7 @@
                         @csrf
                         <input type="hidden" value="{{ $ticker }}">
                         <div class="row">
-                            <div class="col-2 mb-3">
+                            <div class="col-md-5 mb-3">
                                 <label for="days" class="form-label">Prediksi Hari Ke-n</label>
                                 <select id="days" name="days" class="form-select" required>
                                     <option value='' selected>Prediksi Hari ke-n</option>
@@ -28,7 +28,7 @@
                                     <option value='365'>365 hari (1 Tahun)</option>
                                 </select>
                             </div>
-                            <div class="col-3 mb-3">
+                            <div class="col-md-5 mb-3">
                                 <label for="window" class="form-label">Window Simple Moving Average (SMA)</label>
                                 <select id="window" name="window" class="form-select" required>
                                     <option value='' selected>Window</option>

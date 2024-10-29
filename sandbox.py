@@ -1,7 +1,13 @@
+import yfinance as yf
+import pandas as pd
 
+ticker = yf.Ticker('BBCA.JK')
 
-def get_yahoo_shortname(symbol):
-    response = urllib.request.urlopen(f'https://query2.finance.yahoo.com/v1/finance/search?q={symbol}')
-    content = response.read()
-    data = json.loads(content.decode('utf8'))['quotes'][0]['shortname']
-    return data
+df_info = pd.DataFrame.from_dict(ticker.info, orient='index')
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+print(f'Information: {df_info}')
+print(f'Full Information: {ticker.info}')
+

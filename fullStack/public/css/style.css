@@ -218,6 +218,9 @@ body{
 
 .home-section {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   background-color: var(--color-body);
   min-height: 100vh;
   top: 0;

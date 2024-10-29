@@ -17,16 +17,22 @@
 </head>
 
 <body>
-    @extends('layouts.SidebarLayouts')
+    <div class="body">
+        @extends('layouts.SidebarLayouts')
 
-    <section class="home-section">
-        <div class="col">
-            <div class="text fw-800">Saham IDX (Indonesia Stock Exchange)</div>
-        </div>
-        <div class="col px-3 py-2">
-            @yield('content')
-        </div>
-    </section>
+        <section class="home-section">
+            <div class="wrapper d-flex" style="flex: 1;">
+                <div class="hero w-100">
+                    <div class="col">
+                        <div class="text fw-800">Saham IDX (Indonesia Stock Exchange)</div>
+                    </div>
+                    <div class="col mx-3 mb-3">
+                        @yield('content')
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
 
 
     <!-- Scripts -->

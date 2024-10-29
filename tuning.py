@@ -1,6 +1,6 @@
 import yfinance as yf
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import RobustScaler
 
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
@@ -8,7 +8,7 @@ from sklearn.model_selection import GridSearchCV
 
 from sklearn.metrics import make_scorer, root_mean_squared_error, mean_absolute_error, r2_score
 
-mms = MinMaxScaler()
+rs = RobustScaler()
 
 def stocks_ticker():
     bbca = yf.Ticker('BBCA.JK')
@@ -24,14 +24,14 @@ def preprocessing_data():
     features = bbca_df[['Open','High','Low','Volume']]
     target = bbca_df[['Close']]
 
-    features_norm = mms.fit_transform(features)
-    target_norm = mms.fit_transform(target)
+    features_norm = rs.fit_transform(features)
+    target_norm = rs.fit_transform(target)
     return features_norm, target_norm
 
 
 def train_test_data():
     features_norm, target_norm = preprocessing_data()
-    split_data = int(len(features_norm)*0.8)
+    split_data = int(len(features_norm)*0.9)
     
     X_train, X_test = features_norm[:split_data], features_norm[split_data:]
     y_train, y_test = target_norm[:split_data], target_norm[split_data:]
@@ -89,3 +89,4 @@ print('Model going to be tune with GridSearch')
 tuning_model()
 print('Result is :')
 predict_data()
+print('Experiment Done.')

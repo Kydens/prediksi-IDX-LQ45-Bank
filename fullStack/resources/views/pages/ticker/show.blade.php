@@ -13,7 +13,7 @@
                     <hr>
                 </div>
                 <div class="col">
-                    <form action="{{ route('dashboard.predict', ['ticker' => $ticker]) }}" method="GET">
+                    <form action="{{ route('dashboard.predictTicker', ['ticker' => $ticker]) }}" method="GET">
                         @csrf
                         <input type="hidden" value="{{ $ticker }}">
                         <div class="row">

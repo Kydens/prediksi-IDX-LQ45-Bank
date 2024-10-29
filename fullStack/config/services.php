@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'api' => [
+        'serpapi_api_key' => env('APIKEY_SERPAPIGOOGLENEWS'),
+        'microservices_api' => env('MICROSERVICES_API_URL'),
+    ]
+
 ];

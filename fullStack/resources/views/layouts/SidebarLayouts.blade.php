@@ -19,18 +19,18 @@
                 <span class="tooltip">Dashboard</span>
             </li>
             <li>
-                <a href="#">
+                <a href="{{ route('dashboard.show') }}">
                     <i class="bx bx-stats" style="font-size: 24px"></i>
                     <span class="link_name">Prediksi</span>
                 </a>
                 <span class="tooltip">Prediksi</span>
             </li>
             <li>
-                <a href="#">
-                    <i class="bx bx-info-circle" style="font-size: 24px"></i>
-                    <span class="link_name">Informasi</span>
+                <a href="{{ route('dashboard.news') }}">
+                    <i class="bx bx-news" style="font-size: 24px"></i>
+                    <span class="link_name">Berita</span>
                 </a>
-                <span class="tooltip">Informasi</span>
+                <span class="tooltip">Berita</span>
             </li>
             <li>
                 <a href="#">

@@ -5,7 +5,7 @@
         <div class='mb-2 d-flex align-items-center gap-2'>
             <h3>Prediksi Data</h3>
         </div>
-        <a class='btn btn-dark mb-3' href='{{ route('dashboard.ticker', $ticker) }}'>Kembali</a>
+        <a class='btn btn-dark mb-3' href='{{ route('dashboard.viewTicker', $ticker) }}'>Kembali</a>
         <div class='col card p-4 d-flex flex-column gap-3'>
             <div class='col'>
                 <canvas id='chrtTicker' class='pb-4' style='max-height: 500px; max-width: 100%;'></canvas>

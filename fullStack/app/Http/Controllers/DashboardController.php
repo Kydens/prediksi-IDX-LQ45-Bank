@@ -2,22 +2,152 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\ArrayPaginator;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class DashboardController extends Controller
 {
+    private $serpapiAPIKey;
+    private $urlMicroservices;
+
+
+    public function __construct()
+    {
+        $this->serpapiAPIKey = config('services.api.serpapi_api_key');
+        $this->urlMicroservices = config('services.api.microservices_api');
+    }
+
     public function index()
     {
-        $apiKey = env('APIKEY_SERPAPIGOOGLENEWS');
-        $articles = [];
 
-        $guzzleClient = new \GuzzleHttp\Client(['base_uri'=>'https://serpapi.com', 'verify'=>false]);
+        $allArticlesGNews = $this->serpapiAPITopStories($this->serpapiAPIKey);
+
+        $articlesGNews = ArrayPaginator::paginate($allArticlesGNews, 8);
+
+        return view('pages.home', compact('articlesGNews'));
+    }
+
+    public function show()
+    {
+        return view ('pages.show');
+    }
+
+    public function news()
+    {
+        $allArticlesTopStories = $this->serpapiAPITopStories($this->serpapiAPIKey);
+        $allArticlesGNews = $this->serpapiAPIGNews($this->serpapiAPIKey);
+
+        return view ('pages.news', compact('allArticlesTopStories', 'allArticlesGNews'));
+    }
+
+    public function viewTicker($ticker)
+    {
+        try {
+            $response = Http::get(
+            $this->urlMicroservices . $ticker
+            );
+            $apiData = json_decode($response, true);
+        } catch (Exception $e) {
+            return response()->view('layouts.error.503', [],503);
+        }
+
+        return view('pages.ticker.show', compact('apiData', 'ticker'));
+    }
+
+    public function predictTicker(Request $request, $ticker)
+    {
+        $request->validate([
+            'days'=>'required|integer',
+            'window'=>'required|integer'
+        ]);
+
+        $days = $request->input('days');
+        $window = $request->input('window');
 
         try {
-            $response = $guzzleClient->get('/search?google_news',['query'=>['q'=>'saham','gl'=>'id','hl'=>'id','api_key'=>$apiKey]]);
+            $response = Http::get(
+            $this->urlMicroservices . $ticker . '/predict?days=' . $days . '&window=' . $window
+            );
+            $apiData = json_decode($response, true);
+        } catch (Exception $e) {
+            return response()->view('layouts.error.503', [],503);
+        }
+
+
+        return view('pages.ticker.predict', compact('apiData', 'ticker','days','window'));
+    }
+
+    private function serpapiAPIGNews(string $apiKey)
+    {
+        $articles = [];
+
+        $guzzleClient = new \GuzzleHttp\Client([
+            'base_uri'=>'https://serpapi.com',
+            'verify'=>false
+        ]);
+
+        try {
+            $response = $guzzleClient->get('/search',[
+                'query'=>[
+                    'tbm'=>'nws',
+                    'q'=>'saham IDX',
+                    'gl'=>'id',
+                    'hl'=>'id',
+                    'num'=>40,
+                    'safe'=>'active',
+                    'api_key'=>$apiKey,
+                ]
+            ]);
 
             $data = json_decode($response->getBody(), true);
+
+            // dd($data);
+
+            if(isset($data['news_results']) && is_array($data['news_results'])) {
+                $articles = $data['news_results'];
+
+                $articles = array_map(function($article) {
+                    return [
+                        'title' => $article['title'] ?? '',
+                        'url' => $article['link'] ?? '',
+                        'urlToImage' => $article['thumbnail'] ?? '',
+                        'publishedAt' => $article['date'],
+                        'source' => $article['source'] ?? '',
+                    ];
+                }, $articles);
+            }
+
+        } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+            dd($e->getMessage());
+        }
+
+        return $articles;
+    }
+
+    private function serpapiAPITopStories(string $apiKey)
+    {
+        $articles = [];
+
+        $guzzleClient = new \GuzzleHttp\Client([
+            'base_uri'=>'https://serpapi.com',
+            'verify'=>false
+        ]);
+
+        try {
+            $response = $guzzleClient->get('/search?google_news',[
+                'query'=>[
+                    'q'=>'saham LQ45',
+                    'gl'=>'id',
+                    'hl'=>'id',
+                    'api_key'=>$apiKey,
+                ]
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            // dd($data);
 
             if(isset($data['top_stories']) && is_array($data['top_stories'])) {
                 $articles = $data['top_stories'];
@@ -37,34 +167,6 @@ class DashboardController extends Controller
             dd($e->getMessage());
         }
 
-        return view('pages.home', compact('articles'));
-    }
-
-    public function ticker($ticker)
-    {
-        $response = Http::get(
-            $_ENV['MICROSERVICES_API_URL'] . $ticker
-        );
-        $apiData = json_decode($response, true);
-
-        return view('pages.ticker', compact('apiData', 'ticker'));
-    }
-
-    public function predict(Request $request, $ticker)
-    {
-        $request->validate([
-            'days'=>'required|integer',
-            'window'=>'required|integer'
-        ]);
-
-        $days = $request->input('days');
-        $window = $request->input('window');
-
-        $response = Http::get(
-            $_ENV['MICROSERVICES_API_URL'] . $ticker . '/predict?days=' . $days . '&window=' . $window
-        );
-        $apiData = json_decode($response, true);
-
-        return view('pages.predict', compact('apiData', 'ticker','days','window'));
+        return $articles;
     }
 }

@@ -22,6 +22,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class,'index'])->name('dashboard.index');
 
-Route::get('/{ticker}', [DashboardController::class,'ticker'])->name('dashboard.ticker');
+Route::get('/idx45-bank', [DashboardController::class,'show'])->name('dashboard.show');
 
-Route::get('/{ticker}/predict', [DashboardController::class,'predict'])->name('dashboard.predict');
+Route::get('/berita', [DashboardController::class,'news'])->name('dashboard.news');
+
+Route::get('/idx45-bank/{ticker}', [DashboardController::class,'viewTicker'])->name('dashboard.viewTicker');
+
+Route::get('/idx45-bank/{ticker}/predict', [DashboardController::class,'predictTicker'])->name('dashboard.predictTicker');

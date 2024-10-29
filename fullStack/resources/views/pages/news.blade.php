@@ -5,9 +5,12 @@
         @if (count($allArticlesGNews) > 0 || count($allArticlesTopStories) > 0)
             <div class="card">
                 <div class="card-body">
-                    <h5 class="text mx-0 mt-0 mb-0 fw-bold">Berita-berita</h5>
+                    <h5 class="text mx-0 mt-0 mb-0 fw-bold">Berita-berita yang mungkin anda suka</h5>
                     <hr class="mb-4">
                     <div class="row px-3 d-flex gap-3">
+                        {{-- @if (session('error'))
+                            <p>tes</p>
+                        @else --}}
                         @foreach ($allArticlesGNews as $article)
                             <div class="card p-3 shadow-sm" style="width: 24%; border-radius: 10px; overflow: hidden;">
                                 <a href="{{ $article['url'] }}" target="_blank">
@@ -62,9 +65,11 @@
                                 </div>
                             </div>
                         @endforeach
+                        {{-- @endif --}}
                     </div>
                 </div>
             </div>
+        @else
         @endif
     </div>
 @endsection

@@ -21,12 +21,10 @@ class DashboardController extends Controller
 
     public function index()
     {
+        $allArticlesTopStories = $this->serpapiAPITopStories($this->serpapiAPIKey);
+        $articlesTopStories = ArrayPaginator::paginate($allArticlesTopStories, 8);
 
-        $allArticlesGNews = $this->serpapiAPITopStories($this->serpapiAPIKey);
-
-        $articlesGNews = ArrayPaginator::paginate($allArticlesGNews, 8);
-
-        return view('pages.home', compact('articlesGNews'));
+        return view('pages.home', compact('articlesTopStories'));
     }
 
     public function show()
@@ -36,8 +34,13 @@ class DashboardController extends Controller
 
     public function news()
     {
-        $allArticlesTopStories = $this->serpapiAPITopStories($this->serpapiAPIKey);
-        $allArticlesGNews = $this->serpapiAPIGNews($this->serpapiAPIKey);
+        try {
+            $allArticlesTopStories = $this->serpapiAPITopStories($this->serpapiAPIKey);
+            $allArticlesGNews = $this->serpapiAPIGNews($this->serpapiAPIKey);
+        } catch (Exception $e) {
+            session()->flash('error', 'Berita sedang tidak tersedia untuk saat ini.');
+            return view('pages.news');
+        }
 
         return view ('pages.news', compact('allArticlesTopStories', 'allArticlesGNews'));
     }

@@ -25,7 +25,10 @@
         @if (count($articlesTopStories) > 0)
             <div class="card">
                 <div class="card-body">
-                    <h5 class="text mx-0 mt-0 mb-0 fw-bold">Berita Teratas</h5>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="text mx-0 mt-0 mb-0 fw-bold">Berita Teratas</h5>
+                        <a href="{{ route('dashboard.news') }}" class="btn btn-dark">Berita Lainnya</a>
+                    </div>
                     <hr class="mb-4">
                     <div class="row px-3 d-flex gap-3">
                         @foreach ($articlesTopStories as $article)

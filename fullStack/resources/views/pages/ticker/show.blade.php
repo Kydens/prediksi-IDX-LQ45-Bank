@@ -17,17 +17,14 @@
                         @csrf
                         <input type="hidden" value="{{ $ticker }}">
                         <div class="row">
-                            <div class="col-md-5 mb-3">
+                            {{-- <div class="col-md-5 mb-3">
                                 <label for="days" class="form-label">Prediksi Hari Ke-n</label>
                                 <select id="days" name="days" class="form-select" required>
                                     <option value='' selected>Prediksi Hari ke-n</option>
                                     <option value='7'>7 hari (1 Pekan)</option>
                                     <option value='30'>30 hari (1 Bulan)</option>
-                                    <option value='90'>90 hari (3 Bulan)</option>
-                                    <option value='120'>180 hari (6 Bulan)</option>
-                                    <option value='365'>365 hari (1 Tahun)</option>
                                 </select>
-                            </div>
+                            </div> --}}
                             <div class="col-md-5 mb-3">
                                 <label for="window" class="form-label">Window Simple Moving Average (SMA)</label>
                                 <select id="window" name="window" class="form-select" required>

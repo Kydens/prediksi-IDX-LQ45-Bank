@@ -11,13 +11,22 @@
                 <canvas id='chrtTicker' class='pb-4' style='max-height: 500px; max-width: 100%;'></canvas>
                 <button id='resetZoom' class='btn btn-primary'>Reset Zoom</button>
             </div>
+            <hr>
             <div class="col">
-                <hr>
-            </div>
-            <div class="col">
-                <div class="py-4">
+                <div class="py-2">
+                    <div class="card mb-4" style="width:18rem; background-color:#FFE699">
+                        <div class="card-body">
+                            <h5 class="card-title mb-0 fw-bold">Nilai Evaluasi Prediksi</h5>
+                            @foreach ($apiData['data']['evaluation_model'] as $eva => $value)
+                                <div class="card-text">
+                                    <small><strong class="text-uppercase">{{ $eva }}</strong></small>:
+                                    <small class="d-inline mb-0">{{ $value }}</small>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                     <div class="mb-4">
-                        <h5 class="text-center fw-bold">Detail Prediksi Data Untuk Hari ke-{{ $days }} dengan Window
+                        <h5 class="text-center fw-bold">Detail Prediksi Data Untuk {{ $days }} Hari dengan Window
                             {{ $window }}</h5>
                     </div>
                     <div class='d-flex justify-content-center'>

@@ -45,6 +45,11 @@ class DashboardController extends Controller
         return view ('pages.news', compact('allArticlesTopStories', 'allArticlesGNews'));
     }
 
+    public function help()
+    {
+        return view('pages.help');
+    }
+
     public function viewTicker($ticker)
     {
         try {
@@ -62,11 +67,12 @@ class DashboardController extends Controller
     public function predictTicker(Request $request, $ticker)
     {
         $request->validate([
-            'days'=>'required|integer',
+            // 'days'=>'required|integer',
             'window'=>'required|integer'
         ]);
 
-        $days = $request->input('days');
+        // $days = $request->input('days');
+        $days = 30;
         $window = $request->input('window');
 
         try {

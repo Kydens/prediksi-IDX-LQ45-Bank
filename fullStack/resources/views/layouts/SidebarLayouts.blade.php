@@ -33,7 +33,7 @@
                 <span class="tooltip">Berita</span>
             </li>
             <li>
-                <a href="#">
+                <a href="{{ route('dashboard.help') }}">
                     <i class="bx bx-help-circle" style="font-size: 24px"></i>
                     <span class="link_name">Bantuan</span>
                 </a>

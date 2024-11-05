@@ -44,6 +44,7 @@ def get_stock_data(ticker):
         response.headers['Accept'] = 200
         
         return response, 200
+    
     except Exception as e:
         response = modules.jsonify({
             'success': False,
@@ -80,25 +81,24 @@ def get_predict_stock_data(ticker):
         ticker_market = modules.ModelPredict(ticker)
         df, _, _ = ticker_market.stocks_ticker()
         
+        # Create Lag Features
+        df_with_lags = ticker_market.create_lag(df, days=days)
+        
         # Preprocessing Data
-        features, target = ticker_market.preprocessing_data(df)
-        ticker_market.train_test_data(features, target)
+        ticker_market.preprocessing_data(df_with_lags)
         
         # Model
-        ticker_market.voting_model()
+        ticker_market.voting_model(ticker)
         ticker_market.fit_model()
         
         # Predict data with test data
-        y_test_reversed, y_pred_reversed = ticker_market.predict_data()
+        y_pred = ticker_market.predict_data()
         
         # Evaluation result
-        rmse, mae, r2 = ticker_market.evaluation_data(y_test_reversed, y_pred_reversed)
+        rmse, mae, r2 = ticker_market.evaluation_data(y_pred)
         
         # Actual + Predict t+days
-        dates_pred, close_pred, combined_dates, combined_close = ticker_market.combine_actual_predict(features, days)
-        
-        # Evaluation Model to list
-        eva = [rmse,mae,r2]
+        dates_pred, close_pred, combined_dates, combined_close = ticker_market.combine_actual_predict(df, days)
         
         # Bollinger Bands
         sma, upper, lower = ticker_market.bollinger_bands(combined_close, window)
@@ -117,9 +117,13 @@ def get_predict_stock_data(ticker):
                 'df_combined': combined_close,
                 'upper_band': upper,
                 'sma_band': sma,
-                'status': status,
                 'lower_band': lower,
-                'evaluation_model': eva,
+                'status': status,
+                'evaluation_model': {
+                    'rmse': rmse,
+                    'mae': mae,
+                    'r2': r2
+                },
             },
         })
         
@@ -129,16 +133,16 @@ def get_predict_stock_data(ticker):
         return response, 200
     
     except Exception as e:
-        return modules.jsonify({
+        response = modules.jsonify({
             'success': False,
             'error': str(e),
             'message': 'We have an error or we are just updating data',
         })
         
         response.headers['Content-Type'] = 'application/json'
-        response.headers['X-Error-Code'] = 500
+        response.headers['X-Error-Code'] = 503
         
-        return response, 500
+        return response, 503
 
 
 if __name__ == '__main__':

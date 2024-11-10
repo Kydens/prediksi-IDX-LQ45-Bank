@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import RobustScaler
 
 from sklearn.ensemble import RandomForestRegressor
-from xgboost import XGBRegressor
+from microservices.modules.custom_model import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 
 from sklearn.metrics import make_scorer, root_mean_squared_error, mean_absolute_error, r2_score

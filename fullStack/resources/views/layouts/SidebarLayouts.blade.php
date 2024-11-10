@@ -21,9 +21,9 @@
             <li>
                 <a href="{{ route('dashboard.show') }}">
                     <i class="bx bx-stats" style="font-size: 24px"></i>
-                    <span class="link_name">Prediksi</span>
+                    <span class="link_name">Pilihan Saham</span>
                 </a>
-                <span class="tooltip">Prediksi</span>
+                <span class="tooltip">Pilihan Saham</span>
             </li>
             <li>
                 <a href="{{ route('dashboard.news') }}">

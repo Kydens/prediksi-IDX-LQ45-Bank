@@ -34,7 +34,7 @@
                                 </select>
                             </div>
                         </div>
-                        <button class="btn btn-dark" type="submit">Predict</button>
+                        <button class="btn btn-dark" type="submit">Prediksi</button>
                     </form>
                 </div>
             </div>

@@ -2,7 +2,7 @@ import yfinance as yf
 from sklearn.preprocessing import MinMaxScaler
 
 from sklearn.ensemble import RandomForestRegressor, VotingRegressor
-from xgboost import XGBRegressor
+from microservices.modules.custom_model import XGBRegressor
 
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 

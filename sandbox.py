@@ -1,11 +1,9 @@
 import yfinance as yf
 import pandas as pd
-from sklearn.preprocessing import RobustScaler
 import numpy as np
-from typing import List, Union
+from typing import Tuple, List, Union
 
-from sklearn.ensemble import RandomForestRegressor, VotingRegressor
-from xgboost import XGBRegressor
+from custom_model import RandomForestRegressor, XGBoostRegressor, VotingRegressor
 
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
 
@@ -17,7 +15,7 @@ class ModelPredict:
         self.dates_test: List[str] = []
         self.X: np.ndarray = np.array([])
         self.y: np.ndarray = np.array([])
-        self.model: VotingRegressor = None
+        self.model: VotingRegressor = VotingRegressor
         self.combined_dates: Union[pd.DatetimeIndex, List[str]] = pd.DatetimeIndex([])
         self.combined_close: np.ndarray = np.array([])
         self.sma: List[float] = []
@@ -35,25 +33,38 @@ class ModelPredict:
         return df_copy
     
     
-    def prepare_future_data(self, df: pd.DataFrame, days_predict: int)->tuple[pd.DataFrame, pd.DatetimeIndex]:
-        last_date = df.index.max()
+    def prepare_future_data(self, df: pd.DataFrame, days_predict: int)->Tuple[pd.DataFrame, pd.DatetimeIndex]:
+        date = df.index.max()
+        last_date = pd.Timestamp(date)
+        current_date = last_date + pd.Timedelta(days=1)       
         
-        future_dates = pd.date_range(start=last_date+pd.Timedelta(days=1), periods=days_predict, freq='B')
+        future_dates = []
+        days_added = 0
+        while days_added < days_predict:
+            if current_date.weekday() < 5:
+                future_dates.append(current_date)
+                days_added += 1
+            
+            current_date += pd.Timedelta(days=1)
         
-        future_df = pd.DataFrame(index=future_dates, columns=df.columns)
+        # print(f'future date: {future_dates}')
+        future_df_index = pd.DatetimeIndex(future_dates)
+        
+        future_df = pd.DataFrame(index=future_df_index, columns=df.columns)
         
         combined_df = pd.concat([df, future_df])
-        
         combined_df = self.create_lag(combined_df, days=days_predict)
         
         future_feature_df = combined_df.loc[future_dates]
-        
         features_pred = ['open_lag','high_lag','low_lag','volume_lag']
+        
+        print(f'df type: {isinstance(future_feature_df[features_pred], pd.DataFrame)}')
+        print(f'future dates type: {isinstance(future_dates, pd.DatetimeIndex)}')
         
         return future_feature_df[features_pred], future_dates
         
         
-    def stocks_ticker(self)->tuple[pd.DataFrame,List[str],List[float]]:
+    def stocks_ticker(self)->Tuple[pd.DataFrame,List[str],List[float]]:
         ticker_market = yf.Ticker(self.ticker)
         
         df = ticker_market.history(period='5y')
@@ -67,13 +78,13 @@ class ModelPredict:
         return df, self.dates, self.close_actual.tolist()
     
     
-    def preprocessing_data(self, df: pd.DataFrame)->tuple[np.ndarray,np.ndarray]:
+    def preprocessing_data(self, df: pd.DataFrame)->Tuple[np.ndarray,np.ndarray]:
         df.dropna(inplace=True)
         
         features = ['open_lag','high_lag','low_lag','volume_lag']
         target = ['Close']
         
-        self.X = df[features]
+        self.X = df[features].values
         self.y = df[target].values.ravel()
         
         return self.X, self.y
@@ -85,7 +96,7 @@ class ModelPredict:
                                 max_features=7,
                                 min_samples_leaf=2,
                                 min_samples_split=5)
-        xgb = XGBRegressor(n_estimators=100,
+        xgb = XGBoostRegressor(n_estimators=100,
                         eta=0.1,
                         max_depth=9,
                         subsample=0.7)
@@ -102,13 +113,13 @@ class ModelPredict:
         self.model.fit(self.X, self.y)
     
     
-    def predict_data(self)->tuple[np.ndarray]:
+    def predict_data(self)->Tuple[np.ndarray]:
         y_pred = self.model.predict(self.X)
         
         return y_pred
     
     
-    def evaluation_data(self, y_pred: np.ndarray)->tuple[float, float, float]:
+    def evaluation_data(self, y_pred: np.ndarray)->Tuple[float, float, float]:
         rmse = root_mean_squared_error(self.y,y_pred)
         mae = mean_absolute_error(self.y, y_pred)
         r2 = r2_score(self.y,y_pred)
@@ -120,24 +131,24 @@ class ModelPredict:
         future_features, future_dates = self.prepare_future_data(df, days)
         
         prediction_features = ['open_lag', 'high_lag', 'low_lag', 'volume_lag']
-        future_features[prediction_features] = future_features[prediction_features].astype('float64')
-        y_pred_future = self.model.predict(future_features[prediction_features])
+        future_features_df = future_features[prediction_features].astype('float64')
+        y_pred_future = self.model.predict(future_features_df)
         
-        return future_dates.tolist(), y_pred_future.tolist()
+        future_dates_str = [d.strftime('%Y-%m-%d') for d in future_dates]
+        
+        return future_dates_str.tolist(), y_pred_future.tolist()
     
     
     def combine_actual_predict(self, df: pd.DataFrame, days: int)->tuple[List[str], List[float], List[str], List[float]]:
         future_dates, close_pred = self.predict_future_value(df, days)
         
-        future_dates_str = [d.strftime('%Y-%m-%d') for d in future_dates]
-        
         self.combined_close = np.append(self.close_actual, close_pred)
-        self.combined_dates = self.dates + future_dates_str
+        self.combined_dates = self.dates + future_dates
         
-        return future_dates_str, close_pred, self.combined_dates, self.combined_close.tolist()
+        return future_dates, close_pred, self.combined_dates, self.combined_close.tolist()
     
     
-    def bollinger_bands(self, data: List[float], size:int)->tuple[List[float],List[float],List[float]]:
+    def bollinger_bands(self, data: List[float], size:int)->Tuple[List[float],List[float],List[float]]:
         window = pd.Series(data).rolling(size)
         std = window.std()
         sma = window.mean()
@@ -184,23 +195,27 @@ if __name__ == '__main__':
     
     df_with_lags = predict.create_lag(df, days)
     
+    # predict.prepare_future_data(df, days)
+    
     predict.preprocessing_data(df_with_lags)
     
-    # predict.train_test_data(features, target)
+    # # predict.train_test_data(features, target)
 
     predict.voting_model()
-
     predict.fit_model()
 
     y_pred = predict.predict_data()
     
     rmse, mae, r2 = predict.evaluation_data(y_pred)
     
+    # close_future, dates_future = predict.prepare_future_data(df, days)
+    # predict.prepare_future_data(df, days)
+    
     dates_future, close_future, combined_dates, combined_close = predict.combine_actual_predict(df, days)
     
-    sma, upper, lower = predict.bollinger_bands(combined_close, window)
+    # sma, upper, lower = predict.bollinger_bands(combined_close, window)
     
-    status = predict.status_predict(close_future)
+    # status = predict.status_predict(close_future)
     
     # print(close)
     
@@ -208,8 +223,8 @@ if __name__ == '__main__':
     print(mae)
     print(r2)
     
-    # print(dates_future)
-    # print(close_future)
+    print(dates_future)
+    print(close_future)
     
     # print(combined_dates, combined_close)
     
@@ -254,7 +269,7 @@ if __name__ == '__main__':
 #         self.status: List[str] = []
         
         
-#     def stocks_ticker(self)->tuple[pd.DataFrame,List[str],List[float]]:
+#     def stocks_ticker(self)->Tuple[pd.DataFrame,List[str],List[float]]:
 #         ticker_market = yf.Ticker(self.ticker)
         
 #         df = ticker_market.history(period='5y')
@@ -267,7 +282,7 @@ if __name__ == '__main__':
 #         return df, self.dates, self.close_actual.tolist()
     
     
-#     def preprocessing_data(self, df: pd.DataFrame)->tuple[np.ndarray,np.ndarray]:
+#     def preprocessing_data(self, df: pd.DataFrame)->Tuple[np.ndarray,np.ndarray]:
 #         df = df.drop(['Dividends','Stock Splits'], axis=1)
         
 #         features = df[['Open','High','Low','Volume']]
@@ -279,7 +294,7 @@ if __name__ == '__main__':
 #         return features, target
     
     
-#     def train_test_data(self, features_norm: np.ndarray, target_norm: np.ndarray)->tuple[np.ndarray,np.ndarray,np.ndarray,np.ndarray]:
+#     def train_test_data(self, features_norm: np.ndarray, target_norm: np.ndarray)->Tuple[np.ndarray,np.ndarray,np.ndarray,np.ndarray]:
 #         split_data = int(len(features_norm)*0.9)
         
 #         self.dates_test = self.dates[split_data:]
@@ -313,7 +328,7 @@ if __name__ == '__main__':
 #         self.model.fit(self.X_train, self.y_train)
     
     
-#     def predict_data(self)->tuple[np.ndarray,np.ndarray]:
+#     def predict_data(self)->Tuple[np.ndarray,np.ndarray]:
 #         y_pred = self.model.predict(self.X_test)
 
 #         y_test_reversed = self.scaler.inverse_transform(self.y_test.reshape(-1,1))
@@ -322,7 +337,7 @@ if __name__ == '__main__':
 #         return y_test_reversed.flatten(), y_pred_reversed.flatten()
     
     
-#     def evaluation_data(self, y_test: np.ndarray, y_pred: np.ndarray)->tuple[float, float, float]:
+#     def evaluation_data(self, y_test: np.ndarray, y_pred: np.ndarray)->Tuple[float, float, float]:
 #         rmse = root_mean_squared_error(y_test,y_pred)
 #         mae = mean_absolute_error(y_test, y_pred)
 #         r2 = r2_score(y_test,y_pred)
@@ -334,7 +349,7 @@ if __name__ == '__main__':
 #         return rmse, mae, r2
     
     
-#     def predict_future_value(self, data:np.ndarray, days: int)->tuple[pd.DatetimeIndex,np.ndarray]:
+#     def predict_future_value(self, data:np.ndarray, days: int)->Tuple[pd.DatetimeIndex,np.ndarray]:
 #         last_features = data[-days:]
         
 #         y_pred = self.model.predict(last_features)
@@ -347,7 +362,7 @@ if __name__ == '__main__':
 #         return dates_future, y_pred_reversed.flatten()
     
     
-#     def combine_actual_predict(self, data:np.ndarray, days: int)->tuple[List[str], List[float], List[str], List[float]]:
+#     def combine_actual_predict(self, data:np.ndarray, days: int)->Tuple[List[str], List[float], List[str], List[float]]:
 #         dates_pred, close_pred = self.predict_future_value(data, days)
         
 #         dates_pred_list = dates_pred.strftime('%Y-%m-%d')
@@ -358,7 +373,7 @@ if __name__ == '__main__':
 #         return dates_pred_list.tolist(), close_pred.tolist(), self.combined_dates.tolist(), self.combined_close.tolist()
     
     
-#     def bollinger_bands(self, data: List[float], size:int)->tuple[List[float],List[float],List[float]]:
+#     def bollinger_bands(self, data: List[float], size:int)->Tuple[List[float],List[float],List[float]]:
 #         window = pd.Series(data).rolling(size)
 #         std = window.std()
 #         sma = window.mean()

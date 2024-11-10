@@ -4,7 +4,9 @@ from sklearn.preprocessing import RobustScaler
 import numpy as np
 from typing import List, Union
 
-from sklearn.ensemble import RandomForestRegressor, VotingRegressor
+from sklearn.ensemble import VotingRegressor
+# from custom_model import RandomForestRegressor, XGBoostRegressor
+from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 
 class ModelPredict:
@@ -48,7 +50,7 @@ class ModelPredict:
     
     
     def prepare_future_data(self, df: pd.DataFrame, days_predict: int)->tuple[pd.DataFrame, pd.DatetimeIndex]:
-        last_date = df.index.max()
+        last_date = pd.to_datetime(df.index.max())
         
         future_dates = pd.date_range(start=last_date+pd.Timedelta(days=1), periods=days_predict, freq='B')
         

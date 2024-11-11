@@ -157,8 +157,8 @@ class XGBoostTree:
         self.eta = eta
         self.max_depth = max_depth
         self.subsample = subsample
-        self.min_child_weight = min_child_weight # Set to default
-        self.lambda_ = lambda_ # Set to default
+        self.min_child_weight = min_child_weight
+        self.lambda_ = lambda_
         self.root = None
         
         

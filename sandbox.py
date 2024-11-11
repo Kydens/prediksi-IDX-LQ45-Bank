@@ -28,7 +28,7 @@ class ModelPredict:
         df_copy = df.copy()
          
         for feature in ['Open','High','Low','Volume']:
-            df_copy[f'{feature.lower()}_lag'] = df[feature].shift(periods=days, freq='B')
+            df_copy[f'{feature.lower()}_lag'] = df[feature].shift(periods=days)
             
         return df_copy
     
@@ -36,7 +36,7 @@ class ModelPredict:
     def prepare_future_data(self, df: pd.DataFrame, days_predict: int)->Tuple[pd.DataFrame, pd.DatetimeIndex]:
         date = df.index.max()
         last_date = pd.Timestamp(date)
-        current_date = last_date + pd.Timedelta(days=1)       
+        current_date = last_date + pd.Timedelta(days=1)
         
         future_dates = []
         days_added = 0
@@ -47,21 +47,23 @@ class ModelPredict:
             
             current_date += pd.Timedelta(days=1)
         
-        # print(f'future date: {future_dates}')
-        future_df_index = pd.DatetimeIndex(future_dates)
+        print(f'type: {type(future_dates)}')
+        future_dates_index = np.array([str(date) for date in future_dates])
+        print(f'isinstance numpy array: {isinstance(future_dates_index, np.ndarray)}')
+        # future_df = pd.DataFrame(index=future_dates_index, columns=df.columns)
         
-        future_df = pd.DataFrame(index=future_df_index, columns=df.columns)
+        # print(f'future df: {future_df}')
         
-        combined_df = pd.concat([df, future_df])
-        combined_df = self.create_lag(combined_df, days=days_predict)
+        # combined_df = pd.concat([df, future_df])
+        # combined_df = self.create_lag(combined_df, days=days_predict)
         
-        future_feature_df = combined_df.loc[future_dates]
-        features_pred = ['open_lag','high_lag','low_lag','volume_lag']
+        # future_feature_df = combined_df.loc[future_dates]
+        # features_pred = ['open_lag','high_lag','low_lag','volume_lag']
         
-        print(f'df type: {isinstance(future_feature_df[features_pred], pd.DataFrame)}')
-        print(f'future dates type: {isinstance(future_dates, pd.DatetimeIndex)}')
+        # print(f'df type: {isinstance(future_feature_df[features_pred], pd.DataFrame)}')
+        # print(f'future dates type: {isinstance(future_dates, pd.DatetimeIndex)}')
         
-        return future_feature_df[features_pred], future_dates
+        # return future_feature_df[features_pred], future_dates
         
         
     def stocks_ticker(self)->Tuple[pd.DataFrame,List[str],List[float]]:
@@ -209,9 +211,9 @@ if __name__ == '__main__':
     rmse, mae, r2 = predict.evaluation_data(y_pred)
     
     # close_future, dates_future = predict.prepare_future_data(df, days)
-    # predict.prepare_future_data(df, days)
+    predict.prepare_future_data(df, days)
     
-    dates_future, close_future, combined_dates, combined_close = predict.combine_actual_predict(df, days)
+    # dates_future, close_future, combined_dates, combined_close = predict.combine_actual_predict(df, days)
     
     # sma, upper, lower = predict.bollinger_bands(combined_close, window)
     
@@ -223,8 +225,8 @@ if __name__ == '__main__':
     print(mae)
     print(r2)
     
-    print(dates_future)
-    print(close_future)
+    # print(dates_future)
+    # print(close_future)
     
     # print(combined_dates, combined_close)
     

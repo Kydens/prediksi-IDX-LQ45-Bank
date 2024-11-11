@@ -4,9 +4,7 @@ from sklearn.preprocessing import RobustScaler
 import numpy as np
 from typing import List, Union
 
-from sklearn.ensemble import VotingRegressor
-# from custom_model import RandomForestRegressor, XGBoostRegressor
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, VotingRegressor
 from xgboost import XGBRegressor
 
 class ModelPredict:

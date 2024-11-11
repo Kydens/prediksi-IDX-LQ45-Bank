@@ -1,10 +1,10 @@
-./custom_model.py
-./forecasting.py
-./prediction_timeseries.py
+code/custom_model.py
+code/forecasting.py
+prediction_timeseries.py
 sandbox.py
 test.ipynb
 tuning.ipynb
 tuning.py
-.venv
-.idea
-__pycache__
+.venv/
+.idea/
+__pycache__/

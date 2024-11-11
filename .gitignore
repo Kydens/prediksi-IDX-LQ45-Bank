@@ -1,6 +1,6 @@
-/custom_model.py
-/forecasting.py
-/prediction_timeseries.py
+./custom_model.py
+./forecasting.py
+./prediction_timeseries.py
 sandbox.py
 test.ipynb
 tuning.ipynb

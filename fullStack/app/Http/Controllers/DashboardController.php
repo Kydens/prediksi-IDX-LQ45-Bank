@@ -67,11 +67,9 @@ class DashboardController extends Controller
     public function predictTicker(Request $request, $ticker)
     {
         $request->validate([
-            // 'days'=>'required|integer',
             'window'=>'required|integer'
         ]);
 
-        // $days = $request->input('days');
         $days = 30;
         $window = $request->input('window');
 

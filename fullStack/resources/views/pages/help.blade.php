@@ -105,7 +105,8 @@
                                     nilai error, maka semakin bagus model prediksinya.</p>
                                 <p><strong>R2</strong> atau R-Squared adalah nilai ukur hasil dari
                                     pengurangan 1 dengan jumlah kuadrat residual yang dibagi dengan jumlah kuadrat total.
-                                    Nilai R2 berada pada 0 hingga 1. Semakin dekat dengan nilai 1, maka semakin akurat hasil
+                                    Nilai R2 berada pada 0 hingga 1. Semakin dekat dengan nilai 1, maka semakin baik model
+                                    untuk menghasilkan
                                     prediksinya.</p>
                             </div>
                         </div>

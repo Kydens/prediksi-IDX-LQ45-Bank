@@ -59,7 +59,6 @@ def get_stock_data(ticker):
 
 
 @app.route('/api/<ticker>/predict', methods=['GET'])
-# @cache.cached(timeout=86400)
 def get_predict_stock_data(ticker):
     if ticker not in ticker_available:
         response = modules.jsonify({

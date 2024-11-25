@@ -14,9 +14,9 @@
             <li>
                 <a href="{{ route('dashboard.index') }}">
                     <i class="bx bx-grid-alt" style="font-size: 24px"></i>
-                    <span class="link_name">Dashboard</span>
+                    <span class="link_name">Utama</span>
                 </a>
-                <span class="tooltip">Dashboard</span>
+                <span class="tooltip">Utama</span>
             </li>
             <li>
                 <a href="{{ route('dashboard.show') }}">

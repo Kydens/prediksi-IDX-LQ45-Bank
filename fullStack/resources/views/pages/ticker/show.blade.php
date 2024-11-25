@@ -28,7 +28,7 @@
                             <div class="col-md-5 mb-3">
                                 <label for="window" class="form-label">Window Simple Moving Average (SMA)</label>
                                 <select id="window" name="window" class="form-select" required>
-                                    <option value='' selected>Window</option>
+                                    <option value='' selected>-- Pilih pergeseran window --</option>
                                     <option value='20'>20 hari Rolling</option>
                                     <option value='50'>50 hari Rolling</option>
                                 </select>

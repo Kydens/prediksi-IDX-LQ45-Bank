@@ -27,11 +27,15 @@
                             </div> --}}
                             <div class="col-md-5 mb-3">
                                 <label for="window" class="form-label">Window Simple Moving Average (SMA)</label>
-                                <select id="window" name="window" class="form-select" required>
+                                <select id="window" name="window" class="form-select mb-2" required>
                                     <option value='' selected>-- Pilih pergeseran window --</option>
-                                    <option value='20'>20 hari Rolling</option>
-                                    <option value='50'>50 hari Rolling</option>
+                                    <option value='20'>Bergeser 20 hari</option>
+                                    <option value='50'>Bergeser 50 hari</option>
                                 </select>
+                                <small class="text-muted">Window adalah periode pergerakan rata-rata waktu pada
+                                    Bollinger
+                                    Bands
+                                    untuk menentukan status pergerakan sinyal saham.</small>
                             </div>
                         </div>
                         <button class="btn btn-dark" type="submit">Prediksi</button>

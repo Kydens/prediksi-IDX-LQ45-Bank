@@ -70,7 +70,7 @@ class DashboardController extends Controller
             'window'=>'required|integer'
         ]);
 
-        $days = 30;
+        $days = 7;
         $window = $request->input('window');
 
         try {

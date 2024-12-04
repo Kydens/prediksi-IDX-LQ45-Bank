@@ -25,23 +25,10 @@ class ModelPredict:
         self.status: List[str] = []
       
     
-    # def robust_normalize(self, data: np.ndarray)->np.ndarray:
-    #     med = np.median(data, axis=0)
-    #     quartil_1 = np.percentile(data, 25, axis=0)
-    #     quartil_3 = np.percentile(data, 75, axis=0)
-        
-    #     iqr = quartil_3 - quartil_1
-    #     iqr = np.where(iqr == 0, 1, iqr)
-        
-    #     robust = ((data - med) / iqr)
-        
-    #     return robust
-      
-    
     def create_lag(self, df: pd.DataFrame, days: int)->pd.DataFrame:
         df_copy = df.copy()
          
-        for feature in ['Open','High','Low','Volume']:
+        for feature in ['Open','High','Low']:
             df_copy[f'{feature.lower()}_lag'] = df[feature].shift(periods=days, freq='B')
             
         return df_copy
@@ -58,7 +45,7 @@ class ModelPredict:
         combined_df = self.create_lag(combined_df, days=days_predict)
         
         future_feature_df = combined_df.loc[future_dates]
-        features_pred = ['open_lag','high_lag','low_lag','volume_lag']
+        features_pred = ['open_lag','high_lag','low_lag']
         
         return future_feature_df[features_pred], future_dates
         
@@ -69,7 +56,7 @@ class ModelPredict:
         df = ticker_market.history(period='5y')
         
         df.index = pd.to_datetime(df.index, format='%Y-%m-%d')
-        df = df.drop(['Dividends','Stock Splits'], axis=1)
+        df = df.drop(['Volume','Dividends','Stock Splits'], axis=1)
         
         self.dates = df.index.strftime('%Y-%m-%d').tolist()
         self.close_actual = df['Close'].values
@@ -80,7 +67,7 @@ class ModelPredict:
     def preprocessing_data(self, df: pd.DataFrame)->tuple[np.ndarray,np.ndarray]:
         df.dropna(inplace=True)
         
-        features = ['open_lag','high_lag','low_lag','volume_lag']
+        features = ['open_lag','high_lag','low_lag']
         target = ['Close']
         
         X = df[features]
@@ -96,88 +83,88 @@ class ModelPredict:
         data = {
             'BBCA.JK': [{
                 'n_estimators': 100,
-                'max_depth': 12,
-                'max_features': 7,
-                'min_samples_leaf': 2,
-                'min_samples_split': 5,
-            },{
-                'n_estimators': 300,
-                'eta': 0.1,
-                'max_depth': 3,
-                'subsample': 1,
-            },{'weights':[2,1]}],
-            'ARTO.JK': [{
-                'n_estimators': 100,
                 'max_depth': 10,
                 'max_features': 8,
                 'min_samples_leaf': 2,
-                'min_samples_split': 5,
+                'min_samples_split': 2,
             },{
-                'n_estimators': 250,
+                'n_estimators': 100,
+                'eta': 0.25,
+                'max_depth': 9,
+                'subsample': 0.5,
+            },{'weights':[1,2]}],
+            'ARTO.JK': [{
+                'n_estimators': 100,
+                'max_depth': 10,
+                'max_features': 7,
+                'min_samples_leaf': 2,
+                'min_samples_split': 2,
+            },{
+                'n_estimators': 300,
                 'eta': 0.05,
-                'max_depth': 3,
-                'subsample': 0.7,
+                'max_depth': 6,
+                'subsample': 0.5,
             },{'weights':[1,2]}],
             'BMRI.JK': [{
                 'n_estimators': 100,
-                'max_depth': 15,
+                'max_depth': 10,
                 'max_features': 8,
                 'min_samples_leaf': 2,
                 'min_samples_split': 2,
             },{
                 'n_estimators': 300,
-                'eta': 0.15,
-                'max_depth': 3,
+                'eta': 0.25,
+                'max_depth': 9,
                 'subsample': 0.3,
             },{'weights':[1,2]}],
             'BBNI.JK': [{
-                'n_estimators': 150,
-                'max_depth': 12,
+                'n_estimators': 100,
+                'max_depth': 10,
                 'max_features': 6,
                 'min_samples_leaf': 2,
                 'min_samples_split': 2,
             },{
                 'n_estimators': 100,
-                'eta': 0.1,
-                'max_depth': 3,
-                'subsample': 1,
-            },{'weights':[2,1]}],
-            'BBRI.JK': [{
-                'n_estimators': 250,
-                'max_depth': 12,
-                'max_features': 7,
-                'min_samples_leaf': 2,
-                'min_samples_split': 5,
-            },{
-                'n_estimators': 300,
-                'eta': 0.05,
+                'eta': 0.25,
                 'max_depth': 7,
                 'subsample': 0.3,
-            },{'weights':[2,1]}],
-            'BBTN.JK': [{
-                'n_estimators': 150,
-                'max_depth': 10,
-                'max_features': 7,
+            },{'weights':[1,2]}],
+            'BBRI.JK': [{
+                'n_estimators': 200,
+                'max_depth': 20,
+                'max_features': 8,
                 'min_samples_leaf': 2,
                 'min_samples_split': 2,
             },{
-                'n_estimators': 100,
-                'eta': 0.15,
+                'n_estimators': 150,
+                'eta': 0.1,
                 'max_depth': 10,
                 'subsample': 0.5,
             },{'weights':[1,2]}],
+            'BBTN.JK': [{
+                'n_estimators': 300,
+                'max_depth': 20,
+                'max_features': 6,
+                'min_samples_leaf': 2,
+                'min_samples_split': 2,
+            },{
+                'n_estimators': 300,
+                'eta': 0.05,
+                'max_depth': 4,
+                'subsample': 0.7,
+            },{'weights':[2,1]}],
             'BRIS.JK': [{
                 'n_estimators': 150,
-                'max_depth': 20,
-                'max_features': 7,
+                'max_depth': 10,
+                'max_features': 6,
                 'min_samples_leaf': 2,
                 'min_samples_split': 5,
             },{
-                'n_estimators': 100,
+                'n_estimators': 250,
                 'eta': 0.1,
-                'max_depth': 9,
-                'subsample': 0.7,
-            },{'weights':[1,2]}]
+                'max_depth': 3,
+                'subsample': 0.3,
+            },{'weights':[2,1]}]
         }
         
         rf = RandomForestRegressor(**(data[self.ticker][0]))
@@ -215,7 +202,7 @@ class ModelPredict:
     def predict_future_value(self, df: pd.DataFrame, days: int)->tuple[List[str], List[float]]:
         future_features, future_dates = self.prepare_future_data(df, days)
         
-        prediction_features = ['open_lag', 'high_lag', 'low_lag', 'volume_lag']
+        prediction_features = ['open_lag', 'high_lag', 'low_lag']
         future_features[prediction_features] = future_features[prediction_features].astype('float64')
         
         # future_features_scaled = self.robust_normalize(future_features[prediction_features].values)

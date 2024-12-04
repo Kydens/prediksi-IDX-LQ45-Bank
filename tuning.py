@@ -4,7 +4,8 @@ from sklearn.preprocessing import RobustScaler
 
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
+from alive_progress import alive_bar
 
 rs = RobustScaler()
 
@@ -57,8 +58,8 @@ def tuning_model(cv):
         'n_estimators': [100,150,200,250,300],
     }
     
-    grid_rf = GridSearchCV(rf, rf_params, scoring='neg_root_mean_squared_error', cv=cv)
-    grid_xgb = GridSearchCV(xgb, xgb_params, scoring='neg_root_mean_squared_error', cv=cv)
+    grid_rf = GridSearchCV(rf, rf_params, scoring='neg_root_mean_squared_error', cv=TimeSeriesSplit(n_splits=cv))
+    grid_xgb = GridSearchCV(xgb, xgb_params, scoring='neg_root_mean_squared_error', cv=TimeSeriesSplit(n_splits=cv))
 
     return grid_rf, grid_xgb
 
@@ -80,16 +81,19 @@ def predict_data(X, y, cv):
     
 cv = [5,10]
 
-for i in range(len(cv)):
-    ticker = 'BRIS.JK'
-    print(ticker)
-    print(f'Experiment on going using CV {cv[i]}:')  
-    df = stocks_ticker(ticker)
-    df_lags = create_lag(df, days=30)
-    X, y = preprocessing_data(df_lags)
-    print(F'Model going to be tune with GridSearch (CV {cv[i]})')
-    tuning_model(cv[i])
-    print(f'Result with {cv[i]} is :')
-    predict_data(X, y, cv[i])
+tickers = ['ARTO.JK', 'BBCA.JK', 'BBNI.JK', 'BBRI.JK', 'BBTN.JK', 'BMRI.JK', 'BRIS.JK']
 
-print(f'Experiment Done.')
+with alive_bar(len(cv) * len(tickers), title="Processing Stocks") as bar:
+    for i in range(len(cv)):
+        for ticker in tickers:
+            print(f'\nProcessing Ticker: {ticker} | CV: {cv[i]}')
+            df = stocks_ticker(ticker)
+            df_lags = create_lag(df, days=7)
+            X, y = preprocessing_data(df_lags)
+            print(f'Tuning Model with GridSearch (CV={cv[i]})')
+            tuning_model(cv[i])
+            print(f'Predicting for Ticker: {ticker} | CV: {cv[i]}')
+            predict_data(X, y, cv[i])
+            bar()
+
+print('Experiment Done.')

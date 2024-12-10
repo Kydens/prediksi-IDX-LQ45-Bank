@@ -53,9 +53,14 @@ class DashboardController extends Controller
     public function viewTicker($ticker)
     {
         try {
-            $response = Http::get(
-            $this->urlMicroservices . $ticker
+            $response = Http::timeout(3)->get(
+                $this->urlMicroservices . $ticker
             );
+
+            if ($response->status() === 503) {
+                return response()->view('layouts.error.503', [], 503);
+            }
+
             $apiData = json_decode($response, true);
         } catch (Exception $e) {
             return response()->view('layouts.error.503', [],503);
@@ -74,9 +79,14 @@ class DashboardController extends Controller
         $window = $request->input('window');
 
         try {
-            $response = Http::get(
+            $response = Http::timeout(3)->get(
             $this->urlMicroservices . $ticker . '/predict?days=' . $days . '&window=' . $window
             );
+
+            if ($response->status() === 503) {
+                return response()->view('layouts.error.503', [], 503);
+            }
+
             $apiData = json_decode($response, true);
         } catch (Exception $e) {
             return response()->view('layouts.error.503', [],503);

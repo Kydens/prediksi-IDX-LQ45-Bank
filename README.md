@@ -1,4 +1,5 @@
 # IDX LQ45 Banking Stock Signal Movement Prediction
+Author by Eddy Nathansyah
 ## Description
 This application is an application to predict the movement of IDX LQ45 stocks in the banking sector for the next 7 days. This application prediction uses machine learning methods, namely Voting Regression (combining random forest and xgboost) and technical indicators, namely Bollinger Bands.
 

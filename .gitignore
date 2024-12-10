@@ -2,9 +2,9 @@ custom_model.py
 forecasting.py
 prediction_timeseries.py
 sandbox.py
+get-pip.py
 test.ipynb
 tuning.ipynb
-tuning.py
 .venv/
 .idea/
 __pycache__/

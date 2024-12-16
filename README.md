@@ -16,7 +16,16 @@ This application is an application to predict the movement of IDX LQ45 stocks in
     * Disk Space: 2GB
 
 ## Installation Methods
-### Windows
+### **Windows**
+
+### Quick Installation
+There is an app version for this project. You can download it through google drive "https://drive.google.com/drive/folders/1RU-qH01Pyn83fFqrUvjHsMg__26sNxFw?usp=sharing"
+
+After you download it, open the folder in your directory
+
+And open the folder with named "apps" and run the app.exe inside the both folders **Microservices** and **Website**.
+
+### Manual Installation
 ```
 # Clone the Repository
 > git clone https://github.com/Kydens/prediksi-IDX-LQ45-Bank.git
